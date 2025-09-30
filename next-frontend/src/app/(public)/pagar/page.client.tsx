@@ -44,7 +44,7 @@ export default function CheckoutClientPage({
           postcode: "15001",
           country: "PE",
         },
-        line_items: [{ product_id: 38, quantity: 1 }],
+        line_items: [{ product_id: 20, quantity: 1 }],
       };
 
       const result = await orderService.createOrderAndGetPaymentLink(orderData);
