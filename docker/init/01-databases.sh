@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# Este script se detendrá si cualquier comando falla
+set -e
+
+mysql -v -u root -p"${MYSQL_ROOT_PASSWORD}" <<-EOSQL
+
+  CREATE DATABASE IF NOT EXISTS \`${WP_DB_NAME}\`;
+
+  CREATE USER IF NOT EXISTS '${DB_USER}'@'%' IDENTIFIED BY '${DB_PASS}';
+
+  GRANT ALL ON \`${WP_DB_NAME}\`.* TO '${DB_USER}'@'%';
+
+  FLUSH PRIVILEGES;
+
+EOSQL

@@ -1,0 +1,4 @@
+tls:
+  certificates:
+    - certFile: /etc/traefik/conf/certs/localhost.pem
+      keyFile: /etc/traefik/conf/certs/localhost-key.pem

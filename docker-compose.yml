@@ -1,0 +1,61 @@
+services:
+  new_mallhogar_db:
+    env_file: ./.env
+    image: mysql:8.0
+    container_name: new_mallhogar_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    # ports:
+    #   - "3306:3306"
+    volumes:
+      - new_mallhogar_db_data:/var/lib/mysql
+      - ./docker/init:/docker-entrypoint-initdb.d
+    networks:
+      - new_mallhogar_network
+
+  new_mallhogar_wp:
+    env_file: ./.env
+    image: wordpress:6.8.2
+    container_name: new_mallhogar_wp
+    restart: always
+    environment:
+      WORDPRESS_DB_HOST: new_mallhogar_db
+      WORDPRESS_DB_NAME: ${WP_DB_NAME}
+      WORDPRESS_DB_USER: ${DB_USER}
+      WORDPRESS_DB_PASSWORD: ${DB_PASS}
+    volumes:
+      # Volumen persistente
+      - new_mallhogar_wp_data:/var/www/html
+      # Configuraciones personalizadas
+      - ./wp-headless/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
+      - ./wp-headless/config/apache/000-default.conf:/etc/apache2/sites-available/000-default.conf
+    networks:
+      - new_mallhogar_network
+      - shared_network
+    depends_on:
+      - new_mallhogar_db
+
+  new_mallhogar_next:
+    build:
+      context: ./next-frontend
+      dockerfile: Dockerfile.prod
+    container_name: new_mallhogar_next
+    restart: always
+    environment:
+      - NODE_ENV=production
+    networks:
+      - new_mallhogar_network
+      - shared_network
+    depends_on:
+      - new_mallhogar_wp
+
+networks:
+  new_mallhogar_network:
+    driver: bridge
+  shared_network:
+    external: true
+
+volumes:
+  new_mallhogar_db_data:
+  new_mallhogar_wp_data:

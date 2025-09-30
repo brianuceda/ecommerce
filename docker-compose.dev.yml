@@ -1,0 +1,71 @@
+services:
+  traefik:
+    image: traefik:v2.9
+    container_name: traefik
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.file.directory=/etc/traefik/conf"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+    ports:
+      - "80:80"
+      - "8080:443"
+      - "8090:8080"
+    volumes:
+      - ./docker/traefik:/etc/traefik/conf
+      - ./docker/traefik/certs:/etc/traefik/conf/certs
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - new_mallhogar_network
+
+  new_mallhogar_db:
+    env_file: ./.env.dev
+    image: mysql:8.0
+    container_name: new_mallhogar_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - new_mallhogar_db_data:/var/lib/mysql
+      - ./docker/init:/docker-entrypoint-initdb.d
+    networks:
+      - new_mallhogar_network
+
+  new_mallhogar_wp:
+    env_file: ./.env.dev
+    image: wordpress:6.8.2
+    container_name: new_mallhogar_wp
+    restart: always
+    environment:
+      WORDPRESS_DB_HOST: new_mallhogar_db
+      WORDPRESS_DB_NAME: ${WP_DB_NAME}
+      WORDPRESS_DB_USER: ${DB_USER}
+      WORDPRESS_DB_PASSWORD: ${DB_PASS}
+      WORDPRESS_DEBUG: ${WP_DEBUG}
+    volumes:
+      - new_mallhogar_wp_data:/var/www/html
+      - ./wp-headless/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
+      - ./wp-headless/config/apache/000-default.conf:/etc/apache2/sites-available/000-default.conf
+    networks:
+      - new_mallhogar_network
+    depends_on:
+      - new_mallhogar_db
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.wordpress.rule=Host(`localhost`)"
+      - "traefik.http.routers.wordpress.entrypoints=websecure"
+      - "traefik.http.routers.wordpress.tls=true"
+      - "traefik.http.services.wordpress.loadbalancer.server.port=80"
+  
+networks:
+  new_mallhogar_network:
+    driver: bridge
+
+volumes:
+  new_mallhogar_db_data:
+  new_mallhogar_wp_data:

@@ -1,0 +1,13 @@
+wp-headless
+.env
+.env.dev
+.gitattributes
+.gitignore
+docker-compose.dev.yml
+docker-compose.yml
+README.md
+docker
+.vscode
+next-frontend\node_modules
+next-frontend\.next
+next-frontend\public

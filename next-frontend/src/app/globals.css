@@ -1,0 +1,56 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+
+.w-sfull {
+  width: -webkit-fill-available;
+  width: -moz-available;
+}
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 0 0% 3.9%;
+  --foreground-muted: 0 0% 45.1%;
+
+  --card: 0 0% 100%;
+  --inside-card: 0 0% 96.1%;
+  --border: 0 0% 89.8%;
+}
+
+.dark {
+  --background: 0 0% 3.9%;
+  --foreground: 0 0% 98%;
+  --foreground-muted: 0 0% 63.9%;
+
+  --card: 0 0% 7.1%;
+  --inside-card: 0 0% 10%;
+  --border: 0 0% 14.9%;
+}
+
+/* Swiper */
+@layer components {
+  .custom-swiper-container {
+    @apply w-full max-h-[80vh]
+      /* Botones de navegación */
+      [&_.swiper-button-prev]:text-primary [&_.swiper-button-next]:text-primary
+      [&_.swiper-button-prev]:font-bold [&_.swiper-button-next]:font-bold
+      [&_.swiper-button-prev]:text-[26px] [&_.swiper-button-next]:text-[26px]
+      sm:[&_.swiper-button-prev]:text-[28px] sm:[&_.swiper-button-next]:text-[28px]
+      lg:[&_.swiper-button-prev]:text-[30px] lg:[&_.swiper-button-next]:text-[30px]
+      xl:[&_.swiper-button-prev]:text-3xl xl:[&_.swiper-button-next]:text-3xl
+
+      /* Paginación */
+      [&_.swiper-pagination-bullet]:w-2 [&_.swiper-pagination-bullet]:h-2
+      md:[&_.swiper-pagination-bullet]:w-2.5 md:[&_.swiper-pagination-bullet]:h-2.5
+      lg:[&_.swiper-pagination-bullet]:w-[11.5px] lg:[&_.swiper-pagination-bullet]:h-[11.5px]
+      xl:[&_.swiper-pagination-bullet]:w-3 xl:[&_.swiper-pagination-bullet]:h-3
+
+      /* Bullet activo de la paginación */
+      [&_.swiper-pagination-bullet-active]:bg-primary;
+  }
+}
