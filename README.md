@@ -21,23 +21,26 @@
     Push-Location docker/traefik/certs; mkcert localhost; Pop-Location
     ```
 
-3. Servicios del docker-compose:
+3. Iniciar servicios:
 
     ```powershell
-    # Ejecutar
     docker compose -f docker-compose.dev.yml --env-file .env.dev up -d --build
-    docker compose -f docker-compose.dev.yml --env-file .env.dev build --no-cache
-    docker compose -f docker-compose.dev.yml --env-file .env.dev up -d
-    # Detener
     docker compose -f docker-compose.dev.yml down -v
     ```
 
 ## Producción
 
-- docker compose up -d --build
+```bash
+docker compose up -d --build
+```
 
 ## Utilidades
 
-- WPGraphQL
+- WPGraphQL: https://github.com/wp-graphql/wp-graphql
 - WPGraphQL WooCommerce: https://github.com/wp-graphql/wp-graphql-woocommerce
 - 
+
+```powershell
+# Reiniciar 
+docker compose -f docker-compose.dev.yml --env-file .env.dev up -d new_mallhogar_wp
+```

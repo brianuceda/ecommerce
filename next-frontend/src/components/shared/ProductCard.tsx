@@ -115,7 +115,7 @@ export default function ProductCard({
 
           {showDiscountPercentage && discount && (
             <div className="bg-secondary text-white text-xs font-bold px-2 py-1 rounded-md">
-              {discount}%
+              ~{discount}%
             </div>
           )}
         </div>
