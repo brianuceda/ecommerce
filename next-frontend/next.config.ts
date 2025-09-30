@@ -10,6 +10,12 @@ const nextConfig: NextConfig = {
         port: "8080",
         pathname: "/wp-content/uploads/**",
       },
+      {
+        protocol: "https",
+        hostname: "dev-api.mallhogar.com",
+        port: "",
+        pathname: "/wp-content/uploads/**", 
+      },
     ],
   },
 };
