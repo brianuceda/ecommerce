@@ -5,6 +5,7 @@ import {
   mantineHtmlProps,
 } from "@mantine/core";
 import { Toaster } from "sonner";
+import Providers from "./providers";
 import { theme } from "./theme";
 
 // Estilos
@@ -31,8 +32,10 @@ export default function RootLayout({
       </head>
       <body className="font-inter antialiased">
         <MantineProvider theme={theme}>
-          {children}
-          <Toaster richColors expand={true} position="bottom-right" />
+          <Providers>
+            {children}
+            <Toaster richColors expand={true} position="bottom-right" />
+          </Providers>
         </MantineProvider>
       </body>
     </html>

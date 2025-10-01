@@ -6,7 +6,7 @@ import {
   calculateDiscount,
   formatPriceDisplay,
   parseColorFromDescription,
-} from "@/utils/product.utils";
+} from "@/utils/product";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";

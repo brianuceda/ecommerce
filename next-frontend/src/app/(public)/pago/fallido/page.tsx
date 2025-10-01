@@ -1,32 +1,63 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
-import { Text, Title, Center, Button } from "@mantine/core";
+import { useEffect, useState, Suspense, useRef } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { Loader } from "@mantine/core";
 import { XCircle } from "lucide-react";
 import Link from "next/link";
 
-export default function FallidoPage() {
+function FailureComponent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
-  const orderId = searchParams.get("external_reference")?.replace("WC-", "");
+  const [displayOrderId, setDisplayOrderId] = useState<string | null>(null);
+  const hasRun = useRef(false);
+
+  useEffect(() => {
+    if (hasRun.current) return;
+
+    const orderId = searchParams.get("orderId");
+    const signature = searchParams.get("signature");
+
+    if (!orderId || !signature) {
+      router.replace("/");
+      return;
+    }
+
+    hasRun.current = true;
+
+    const cleanUrl = `${window.location.pathname}?orderId=${orderId}&signature=${signature}`;
+    router.replace(cleanUrl, { scroll: false });
+    setDisplayOrderId(orderId);
+  }, [searchParams, router]);
+
+  if (!displayOrderId) {
+    return <Loader />;
+  }
 
   return (
-    <Center style={{ flexDirection: "column", textAlign: "center" }}>
+    <div>
       <XCircle size={48} className="text-red-500" />
-      <Title order={2} mt="md">
-        El pago fue rechazado
-      </Title>
-      <Text c="dimmed" mt="xs">
-        {orderId
-          ? `Hubo un problema al procesar el pago para tu pedido #${orderId}.`
-          : "Hubo un problema al procesar tu pago."}
-      </Text>
-      <Text mt="lg">
+      <h1>El pago fue rechazado</h1>
+      <p>
+        {`Hubo un problema al procesar el pago para tu pedido #${displayOrderId}.`}
+      </p>
+      <p>
         No se ha realizado ningún cargo a tu cuenta. Por favor, intenta
         nuevamente o utiliza otro método de pago.
-      </Text>
-      <Button component={Link} href="/pagar" mt="xl" variant="outline">
-        Volver a intentar el pago
-      </Button>
-    </Center>
+      </p>
+      <Link href="/pagar">
+        <a>Volver a intentar el pago</a>
+      </Link>
+    </div>
+  );
+}
+
+export default function FailureClientPage() {
+  return (
+    <Suspense fallback={<Loader />}>
+      <div>
+        <FailureComponent />
+      </div>
+    </Suspense>
   );
 }

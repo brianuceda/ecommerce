@@ -1,25 +1,35 @@
+export enum OrderStatus {
+  PENDING = "PENDING",
+  PROCESSING = "PROCESSING",
+  ON_HOLD = "ON_HOLD",
+  COMPLETED = "COMPLETED",
+  CANCELLED = "CANCELLED",
+  REFUNDED = "REFUNDED",
+  FAILED = "FAILED",
+  UNKNOWN = "UNKNOWN",
+}
+
+// Representa la estructura del payload para crear una Orden de Venta
 export interface OrderPayload {
   payment_method: string;
   payment_method_title: string;
   set_paid: false;
-  billing: BillingInfo;
-  shipping: ShippingInfo;
-  line_items: LineItem[];
-  // Opcional: Si el cliente está logueado
-  customer_id?: number;
+  billing: OrderBillingInfo;
+  shipping: OrderShippingInfo;
+  line_items: {
+    product_id: number;
+    variation_id?: number;
+    quantity: number;
+  }[];
+  customer_id?: number; // autenticación
 }
 
-export interface CreatedOrder {
-  id: number;
-  status: string;
-  order_key: string;
-  total: string;
-}
-
-export interface BillingInfo {
+// Representa la Información de facturación
+export interface OrderBillingInfo {
   first_name: string;
   last_name: string;
   address_1: string;
+  address2: string;
   city: string;
   state: string;
   postcode: string;
@@ -28,10 +38,31 @@ export interface BillingInfo {
   phone: string;
 }
 
-export type ShippingInfo = Omit<BillingInfo, "email" | "phone">;
+// Representa la Información de envío
+export type OrderShippingInfo = Omit<OrderBillingInfo, "email" | "phone">;
 
-export interface LineItem {
-  product_id: number;
+// Representa un ítem dentro de una Orden de Venta
+export interface LineItemOrder {
   quantity: number;
-  variation_id?: number; // Si es un producto variable
+  total: number;
+  name: string;
+  price: number;
+  regular_price: number;
+  image?: {
+    source_url: string;
+    alt_text?: string;
+  };
+}
+
+// Representa una Orden de Venta ya pagada
+export interface VerifiedOrder {
+  order_number: string;
+  status: OrderStatus;
+  date: string;
+  shipping_total: number;
+  subtotal: number;
+  total: number;
+  payment_method_title: string;
+  billing: OrderBillingInfo;
+  line_items: LineItemOrder[];
 }

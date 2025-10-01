@@ -1,7 +1,7 @@
 "use client";
 
-import Container from "@/components/shared/Container";
-import ProductCard from "@/components/shared/ProductCard";
+import Container from "@/components/shared/general/Container";
+import ProductCard from "@/components/shared/woo/ProductCard";
 import { Product } from "@/types/product";
 
 interface ShopClientPageProps {

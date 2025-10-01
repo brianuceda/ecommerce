@@ -1,66 +1,79 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
-import { Text, Title, Loader, Alert, Center } from "@mantine/core";
+import { useEffect, useState, Suspense, useRef } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
+import { Loader, Alert, Card } from "@mantine/core";
 import { CheckCircle2, XCircle, AlertCircle } from "lucide-react";
+import Container from "@/components/shared/general/Container";
+import Title from "@/components/shared/general/Title";
+import Image from "next/image";
+import { LineItemOrder } from "@/types/order";
 
-export default function ExitosoPage() {
-  const searchParams = useSearchParams();
-  const orderId = searchParams.get("external_reference")?.replace("WC-", "");
-
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [order, setOrder] = useState<{ status: string; id: number } | null>(
-    null
+async function fetchOrderStatus(orderId: string, signature: string) {
+  const response = await fetch(
+    `/api/order-status?orderId=${orderId}&signature=${signature}`
   );
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(
+      errorData.error || "No se pudo verificar el estado del pedido."
+    );
+  }
+  const data = await response.json();
+  console.log(data);
+  return data;
+}
+
+function SuccessComponent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [params, setParams] = useState<{
+    orderId: string;
+    signature: string;
+  } | null>(null);
+  const hasRun = useRef(false);
 
   useEffect(() => {
-    if (!orderId) {
-      setError("No se encontró una referencia de pedido válida en la URL.");
-      setIsLoading(false);
+    if (hasRun.current) return;
+
+    const orderId = searchParams.get("orderId");
+    const signature = searchParams.get("signature");
+
+    if (!orderId || !signature) {
+      router.replace("/");
       return;
     }
 
-    const verifyOrderStatus = async () => {
-      try {
-        const response = await fetch(`/api/order-status?orderId=${orderId}`);
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(
-            errorData.error || "No se pudo verificar el estado del pedido."
-          );
-        }
-        const data = await response.json();
-        setOrder({ status: data.status, id: data.id });
-      } catch (err: unknown) {
-        setError(
-          err instanceof Error
-            ? err.message
-            : "Ocurrió un error inesperado al verificar tu orden."
-        );
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    hasRun.current = true;
 
-    // Le damos un pequeño tiempo al webhook para que llegue antes de consultar
-    const timer = setTimeout(() => {
-      verifyOrderStatus();
-    }, 2000); // 2 segundos de espera
+    const cleanUrl = `${window.location.pathname}?orderId=${orderId}&signature=${signature}`;
+    router.replace(cleanUrl, { scroll: false });
 
-    return () => clearTimeout(timer);
-  }, [orderId]);
+    setParams({ orderId, signature });
+  }, [searchParams, router]);
 
-  if (isLoading) {
+  const {
+    data: order,
+    error,
+    isLoading,
+  } = useQuery({
+    queryKey: ["orderStatus", params?.orderId],
+    queryFn: () => fetchOrderStatus(params!.orderId, params!.signature),
+    enabled: !!params,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+
+  if (isLoading || !params) {
     return (
-      <Center style={{ flexDirection: "column" }}>
-        <Loader />
-        <Text mt="md">Verificando la confirmación de tu pago...</Text>
-        <Text size="sm" c="dimmed">
-          Esto puede tardar unos segundos.
-        </Text>
-      </Center>
+      <Card shadow="sm" padding="lg" radius="md" withBorder>
+        <div className="grid place-items-center mb-2">
+          <Loader size={48} />
+        </div>
+        <Title>Verificando la confirmación de tu pago...</Title>
+        <p>Esto puede tardar unos segundos.</p>
+      </Card>
     );
   }
 
@@ -72,28 +85,29 @@ export default function ExitosoPage() {
         color="red"
         radius="md"
       >
-        {error}
+        {error.message}
       </Alert>
     );
   }
 
-  // El pago se aprobó, pero el webhook quizás no ha llegado. 'processing' o 'completed' son estados válidos.
+
   const isPaid =
     order?.status === "processing" || order?.status === "completed";
 
   return (
-    <Center style={{ flexDirection: "column", textAlign: "center" }}>
+    <div className="space-y-6">
+    <Card shadow="sm" padding="lg" radius="md" withBorder>
       {isPaid ? (
         <>
-          <CheckCircle2 size={48} className="text-green-500" />
-          <Title order={2} mt="md">
-            ¡Tu pago fue exitoso!
-          </Title>
-          <Text>
-            Gracias por tu compra. Hemos recibido tu pedido #{order?.id} y ya lo
+          <div className="grid place-items-center mb-2">
+            <CheckCircle2 size={48} className="text-green-500" />
+          </div>
+          <Title>¡Tu pago fue exitoso!</Title>
+          <p>
+            Hemos recibido tu pedido #{order?.id} y ya lo
             estamos preparando. Recibirás una confirmación por correo
             electrónico.
-          </Text>
+          </p>
         </>
       ) : (
         <Alert
@@ -103,10 +117,105 @@ export default function ExitosoPage() {
           radius="md"
         >
           Recibimos la aprobación de tu pago para la orden #{order?.id}. Estamos
-          esperando la confirmación final en nuestro sistema para comenzar a
-          procesarla. No necesitas hacer nada más.
+          esperando la confirmación final en nuestro sistema.
         </Alert>
       )}
-    </Center>
+    </Card>
+
+      {/* Detalles de la orden */}
+      {order && (
+        <Card shadow="sm" padding="lg" radius="md" withBorder>
+          <h2 className="text-xl font-semibold mb-4">Detalles de tu pedido</h2>
+
+          <div className="space-y-4">
+            {/* Items de la orden */}
+            <div>
+              <h3 className="font-medium mb-2">Productos:</h3>
+              {order.line_items.map((item: LineItemOrder, index: number) => (
+                <div
+                  key={index}
+                  className="flex items-center gap-4 py-3 border-b last:border-b-0"
+                >
+                  {item.image && (
+                    <Image
+                      src={item.image.source_url}
+                      alt={item.image.alt_text || item.name}
+                      className="w-20 h-20 object-cover rounded"
+                      width={120}
+                      height={120}
+                    />
+                  )}
+                  <div className="flex-1">
+                    <span className="font-medium">{item.name}</span>
+                    {item.regular_price > item.price && (
+                      <p className="text-sm text-gray-500 line-through">
+                        S/ {item.regular_price.toFixed(2)} c/u
+                      </p>
+                    )}
+                    <p className="text-sm font-medium">
+                      S/ {item.price.toFixed(2)} c/u
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-semibold">
+                      S/ {item.total.toFixed(2)}
+                    </p>
+                    {item.quantity > 1 && (
+                      <p className="text-xs text-gray-600">
+                        ({item.quantity} × {item.price.toFixed(2)})
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Totales */}
+            <div className="border-t pt-4 space-y-2">
+              <div className="flex justify-between">
+                <span>Subtotal:</span>
+                <span>S/ {order.subtotal.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Envío:</span>
+                <span>S/ {order.shipping_total.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between font-bold text-lg">
+                <span>Total:</span>
+                <span>S/ {order.total.toFixed(2)}</span>
+              </div>
+            </div>
+
+            {/* Información de facturación */}
+            <div className="border-t pt-4">
+              <h3 className="font-medium mb-2">Información de envío:</h3>
+              <div className="text-sm text-gray-700">
+                <p>
+                  {order.billing.first_name} {order.billing.last_name}
+                </p>
+                <p>{order.billing.address1}</p>
+                {order.billing.address2 && <p>{order.billing.address2}</p>}
+                <p>
+                  {order.billing.city}, {order.billing.state}{" "}
+                  {order.billing.postcode}
+                </p>
+                <p className="mt-2">{order.billing.email}</p>
+                <p>{order.billing.phone}</p>
+              </div>
+            </div>
+          </div>
+        </Card>
+      )}
+    </div>
+  );
+}
+
+export default function SuccessClientPage() {
+  return (
+    <Suspense fallback={<Loader />}>
+      <Container className="items-center text-center">
+        <SuccessComponent />
+      </Container>
+    </Suspense>
   );
 }

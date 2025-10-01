@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import Container from "@/components/shared/Container";
+import Container from "@/components/shared/general/Container";
 import Image from "next/image";
 
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -12,7 +12,7 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import Link from "next/link";
 import { Product } from "@/types/product";
-import ProductCard from "@/components/shared/ProductCard";
+import ProductCard from "@/components/shared/woo/ProductCard";
 
 const homePath = "/images/home";
 

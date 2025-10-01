@@ -1,7 +1,7 @@
 // next-frontend/src/app/(public)/page.tsx
 
 import HeaderPublic from "@/components/public/HeaderPublic";
-import FooterPublic from "@/components/shared/Footer";
+import FooterPublic from "@/components/shared/general/Footer";
 import { productService } from "@/services/product.service";
 import HomeClientPage from "./page.client";
 import { Product } from "@/types/product";

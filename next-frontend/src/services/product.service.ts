@@ -29,7 +29,7 @@ class ProductService {
     this.apiUrl = process.env.WC_GRAPHQL_API_URL || "";
     this.authHeader = "";
 
-    const username = process.env.WC_GRAPHQL_API_APP_USERNAME || "";
+    const username = process.env.WC_GRAPHQL_API_APP_NAME || "";
     const password = process.env.WC_GRAPHQL_API_APP_PASSWORD || "";
 
     if (!this.apiUrl || !username || !password) {

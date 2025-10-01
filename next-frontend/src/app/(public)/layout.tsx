@@ -1,5 +1,5 @@
 import HeaderPublic from "@/components/public/HeaderPublic";
-import Footer from "@/components/shared/Footer";
+import Footer from "@/components/shared/general/Footer";
 
 export default function PublicLayout({
   children,
@@ -9,7 +9,7 @@ export default function PublicLayout({
   return (
     <main className="min-h-screen flex flex-col">
       <HeaderPublic />
-      <div className="flex-1">{children}</div>
+      <div className="flex-1 flex flex-col">{children}</div>
       <Footer />
     </main>
   );

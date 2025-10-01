@@ -1,5 +1,6 @@
 // Parsea un string de precio de WooCommerce (simple o rango) y devuelve un array de números.
-// Ejemplo: "S/&nbsp;1,000.00 - S/&nbsp;1,799.00" => [1000.00, 1799.00]
+// Ej. 1: "S/&nbsp;1,000.00 - S/&nbsp;1,799.00" => [1000.00, 1799.00]
+// Ej. 2: "S/&nbsp;1,000.00" => [1000.00]
 export const parsePrice = (
   priceString: string | null | undefined
 ): number[] => {

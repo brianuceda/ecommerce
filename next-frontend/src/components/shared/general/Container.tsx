@@ -1,4 +1,3 @@
-import React from "react";
 import { clsx } from "clsx";
 
 interface ContainerProps {
@@ -15,7 +14,7 @@ export default function Container({
   className,
 }: ContainerProps) {
   const finalClassName = clsx(
-    "mx-auto w-sfull",
+    "mx-auto w-sfull flex-1 flex flex-col",
     {
       "max-w-screen-2xl px-3 py-6 sm:px-6 sm:py-10 lg:px-8 lg:py-12": type === "default",
     },

@@ -1,33 +1,67 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
-import { Text, Title, Center } from "@mantine/core";
+import { useEffect, useState, Suspense, useRef } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { Loader } from "@mantine/core";
 import { Hourglass } from "lucide-react";
 import Link from "next/link";
 
-export default function PendientePage() {
+function PendingComponent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
-  const orderId = searchParams.get("external_reference")?.replace("WC-", "");
+  const [displayOrderId, setDisplayOrderId] = useState<string | null>(null);
+  const hasRun = useRef(false);
+
+  useEffect(() => {
+    if (hasRun.current) return;
+
+    const orderId = searchParams.get("orderId");
+    const signature = searchParams.get("signature");
+
+    if (!orderId || !signature) {
+      router.replace("/");
+      return;
+    }
+
+    hasRun.current = true;
+
+    const cleanUrl = `${window.location.pathname}?orderId=${orderId}&signature=${signature}`;
+    router.replace(cleanUrl, { scroll: false });
+    setDisplayOrderId(orderId);
+  }, [searchParams, router]);
+
+  if (!displayOrderId) {
+    return <Loader />;
+  }
 
   return (
-    <Center style={{ flexDirection: "column", textAlign: "center" }}>
+    <div>
       <Hourglass size={48} className="text-yellow-500" />
-      <Title order={2} mt="md">
-        Tu pago está pendiente de aprobación
-      </Title>
-      <Text c="dimmed" mt="xs">
-        {orderId
-          ? `Recibimos tu pedido #${orderId} y estamos esperando la confirmación del pago.`
-          : "Estamos esperando la confirmación del pago."}
-      </Text>
-      <Text mt="lg">
+      <h1>Tu pago está pendiente de aprobación</h1>
+      <p>
+        {`Recibimos tu pedido #${displayOrderId} y estamos esperando la confirmación del pago.`}
+      </p>
+      <p>
         En cuanto el pago se acredite, procesaremos tu pedido y te enviaremos
         una notificación por correo electrónico. No necesitas hacer nada más.
-      </Text>
-      <Text mt="xl" size="sm">
+      </p>
+      <p>
         Puedes ver el estado de tus pedidos en{" "}
-        <Link href="/mi-cuenta/pedidos">tu cuenta</Link>.
-      </Text>
-    </Center>
+        <Link href="/mi-cuenta/pedidos">
+          <a>tu cuenta</a>
+        </Link>
+        .
+      </p>
+    </div>
+  );
+}
+
+export default function PendingClientPage() {
+  return (
+    <Suspense fallback={<Loader />}>
+      <div>
+        <PendingComponent />
+      </div>
+    </Suspense>
   );
 }

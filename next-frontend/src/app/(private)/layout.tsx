@@ -1,5 +1,5 @@
 import HeaderPrivate from "@/components/private/HeaderPrivate";
-import Footer from "@/components/shared/Footer";
+import Footer from "@/components/shared/general/Footer";
 
 export default function PrivateLayout({
   children,
@@ -9,7 +9,7 @@ export default function PrivateLayout({
   return (
     <main className="min-h-screen flex flex-col">
       <HeaderPrivate />
-      <div className="flex-1">{children}</div>
+      <div className="flex-1 flex flex-col">{children}</div>
       <Footer />
     </main>
   );
