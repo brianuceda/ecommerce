@@ -23,16 +23,22 @@ interface GraphQLResponse {
 
 class ProductService {
   private apiUrl: string;
-  private secretKey: string;
+  private authHeader: string;
 
   constructor() {
     this.apiUrl = process.env.WC_GRAPHQL_API_URL || "";
-    this.secretKey = process.env.WC_GRAPHQL_API_SECRET_KEY || "";
+    this.authHeader = "";
 
-    if (!this.apiUrl || !this.secretKey) {
-      console.warn(
-        "API URL o Secret Key de WooCommerce no están configuradas."
-      );
+    const username = process.env.WC_GRAPHQL_API_APP_USERNAME || "";
+    const password = process.env.WC_GRAPHQL_API_APP_PASSWORD || "";
+
+    if (!this.apiUrl || !username || !password) {
+      console.warn("Credenciales GraphQL inválidas.");
+    } else {
+      const encodedCredentials = Buffer.from(
+        `${username}:${password}`
+      ).toString("base64");
+      this.authHeader = `Basic ${encodedCredentials}`;
     }
   }
 
@@ -109,7 +115,7 @@ class ProductService {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-API-KEY": this.secretKey,
+          Authorization: this.authHeader,
         },
         body: JSON.stringify({
           query,

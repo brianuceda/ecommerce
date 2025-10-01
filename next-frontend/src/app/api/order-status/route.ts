@@ -1,6 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
+  const apiUrl = process.env.WC_REST_API_URL;
+  const credentials = Buffer.from(
+    `${process.env.WC_REST_API_CONSUMER_KEY}:${process.env.WC_REST_API_CONSUMER_SECRET}`
+  ).toString("base64");
+
+  if (!apiUrl || !credentials) {
+    return NextResponse.json(
+      { error: "Credenciales REST inválidas." },
+      { status: 500 }
+    );
+  }
+
   const { searchParams } = new URL(req.url);
   const orderId = searchParams.get("orderId");
 
@@ -10,11 +22,7 @@ export async function GET(req: NextRequest) {
       { status: 400 }
     );
   }
-  
-  const apiUrl = process.env.WC_REST_API_URL;
-  const credentials = Buffer.from(
-    `${process.env.WC_REST_API_CONSUMER_KEY}:${process.env.WC_REST_API_CONSUMER_SECRET}`
-  ).toString("base64");
+
 
   try {
     const orderResponse = await fetch(`${apiUrl}/orders/${orderId}`, {

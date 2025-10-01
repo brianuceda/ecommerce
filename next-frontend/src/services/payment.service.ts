@@ -2,18 +2,24 @@ import { PaymentGateway } from "@/types/payment";
 
 class PaymentService {
   private apiUrl: string;
-  private apiConsumerKey: string;
-  private apiConsumerSecret: string;
+  private authHeader: string;
 
   constructor() {
     this.apiUrl = process.env.WC_REST_API_URL || "";
-    this.apiConsumerKey = process.env.WC_REST_API_CONSUMER_KEY || "";
-    this.apiConsumerSecret = process.env.WC_REST_API_CONSUMER_SECRET || "";
+    this.authHeader = "";
 
-    if (!this.apiUrl || !this.apiConsumerKey || !this.apiConsumerSecret) {
+    const username = process.env.WC_GRAPHQL_API_APP_USERNAME || "";
+    const password = process.env.WC_GRAPHQL_API_APP_PASSWORD || "";
+
+    if (!this.apiUrl || !username || !password) {
       console.warn(
-        "API URL, Consumer Key o Consumer Secret de WooCommerce no están configuradas."
+        "Credenciales REST inválidas."
       );
+    } else {
+      const encodedCredentials = Buffer.from(
+        `${username}:${password}`
+      ).toString("base64");
+      this.authHeader = `Basic ${encodedCredentials}`;
     }
   }
 
@@ -24,14 +30,10 @@ class PaymentService {
   async getAvailableGateways(): Promise<PaymentGateway[]> {
     const url = `${this.apiUrl}/payment_gateways`;
 
-    const encodedCredentials = Buffer.from(
-      `${this.apiConsumerKey}:${this.apiConsumerSecret}`
-    ).toString("base64");
-
     try {
       const response = await fetch(url, {
         headers: {
-          Authorization: `Basic ${encodedCredentials}`,
+          Authorization: this.authHeader,
         },
         cache: "no-store",
       });
