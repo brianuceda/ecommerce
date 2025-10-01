@@ -1,36 +1,29 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+### Detalle de Lógica de Desarrollo con Next.js 15
 
-## Getting Started
+#### Para obtención de datos inicial al entrar a una ruta, se usan **2 archivos** por página:
 
-First, run the development server:
+- `page.tsx`: Guarda en un **objeto** la respuesta de una solicitud http que se ejecuta en el **servidor**. De este modo se obtiene cualquier dato de forma segura sin necesidad de que el cliente haga una solicitud http.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- `page.client.tsx`: Es **llamado** como componente en el archivo `page.tsx` recibiendo como **parámetro** el objeto respuesta de la solicitud http. 
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+#### Para interacción del cliente con **el o algún** servidor hay **2 escenarios**:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. No es importante ocultar la lógica o URL final a la que se quiera hacer el llamado via http.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+    - Se crea un servicio en src/services/**archivo.service.ts** y ese archivo debe manejar la lógica de interacción con cualquier servicio externo.
+    - Este archivo es enviado al cliente por lo que no debe contener información sensible.
+    - Cualquier variable de entorno definida en `.env` que se quiera utilizar en este servicio, debe comenzar con **NEXT_PUBLIC_** ya que será enviada al cliente.
 
-## Learn More
+2. Si es importante ocultar la lógica o URL final a la que se quiera hacer el llamado via http.
 
-To learn more about Next.js, take a look at the following resources:
+    - Se crea un endpoint en src/app/api/**ruta**/route.ts y ese archivo debe manejar la lógica de interacción con cualquier servicio externo.
+    - Este archivo es ejecutado en el servidor por lo que puede contener información sensible.
+    - Cualquier variable de entorno definida en `.env` que se quiera utilizar en este servicio, no debe comenzar con **NEXT_PUBLIC_** ya que será ejecutada en el servidor y puede contener información sensible.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Detalle de Carpetas y Archivos (rutas)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- src/app/**layout.tsx**: Archivo principal de layout
+- src/app/**page.tsx**: Página principal (ejecutada en el servidor para traer los datos de los productos)
+- src/app/**page.client.tsx**: Página principal (componente que recibe los datos de productos y los muestra en el cliente)
+- src/app/producto/**[slug]**/page.tsx: Página de producto (ejecutada en el servidor para traer los datos del producto)
+- src/app/producto/**[slug]**/page.client.tsx: Página de producto (componente que recibe los datos del producto y los muestra en el cliente)
