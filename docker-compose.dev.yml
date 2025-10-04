@@ -49,7 +49,7 @@ services:
       WORDPRESS_DEBUG: ${WP_DEBUG}
     volumes:
       - new_mallhogar_wp_data:/var/www/html
-      - ./wp-headless/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
+      - ./wp-headless/config/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
       - ./wp-headless/config/apache/000-default.conf:/etc/apache2/sites-available/000-default.conf
     networks:
       - new_mallhogar_network

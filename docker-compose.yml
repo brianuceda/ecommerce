@@ -29,7 +29,7 @@ services:
       # Volumen persistente
       - new_mallhogar_wph_data:/var/www/html
       # Configuraciones personalizadas
-      - ./wp-headless/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
+      - ./wp-headless/config/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
       - ./wp-headless/config/apache/000-default.conf:/etc/apache2/sites-available/000-default.conf
     depends_on:
       - new_mallhogar_db
