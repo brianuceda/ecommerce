@@ -14,27 +14,28 @@ services:
     networks:
       - new_mallhogar_network
 
-  new_mallhogar_wp:
+  new_mallhogar_wph:
     env_file: ./.env
     image: wordpress:6.8.2
-    container_name: new_mallhogar_wp
+    container_name: new_mallhogar_wph
     restart: always
     environment:
       WORDPRESS_DB_HOST: new_mallhogar_db
       WORDPRESS_DB_NAME: ${WP_DB_NAME}
       WORDPRESS_DB_USER: ${DB_USER}
       WORDPRESS_DB_PASSWORD: ${DB_PASS}
+      WORDPRESS_DEBUG: ${WP_DEBUG}
     volumes:
       # Volumen persistente
-      - new_mallhogar_wp_data:/var/www/html
+      - new_mallhogar_wph_data:/var/www/html
       # Configuraciones personalizadas
       - ./wp-headless/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
       - ./wp-headless/config/apache/000-default.conf:/etc/apache2/sites-available/000-default.conf
+    depends_on:
+      - new_mallhogar_db
     networks:
       - new_mallhogar_network
       - shared_network
-    depends_on:
-      - new_mallhogar_db
 
   new_mallhogar_next:
     build:
@@ -44,11 +45,11 @@ services:
     restart: always
     environment:
       - NODE_ENV=production
+    depends_on:
+      - new_mallhogar_wph
     networks:
       - new_mallhogar_network
       - shared_network
-    depends_on:
-      - new_mallhogar_wp
 
 networks:
   new_mallhogar_network:
@@ -58,4 +59,4 @@ networks:
 
 volumes:
   new_mallhogar_db_data:
-  new_mallhogar_wp_data:
+  new_mallhogar_wph_data:

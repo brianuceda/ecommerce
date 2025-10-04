@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# Este script se detendrá si cualquier comando falla
 set -e
 
 mysql -v -u root -p"${MYSQL_ROOT_PASSWORD}" <<-EOSQL

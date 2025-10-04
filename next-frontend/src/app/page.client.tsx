@@ -13,6 +13,7 @@ import "swiper/css/pagination";
 import Link from "next/link";
 import { Product } from "@/types/product";
 import ProductCard from "@/components/shared/woo/ProductCard";
+import Title from "@/components/shared/general/Title";
 
 const homePath = "/images/home";
 
@@ -132,7 +133,7 @@ export default function HomeClientPage({
 
       {/* Productos Más Vendidos */}
       <Container as="section">
-        <h2 className="text-3xl font-semibold text-center font-montserrat mb-6 lg:mb-12">PRODUCTOS MÁS VENDIDOS</h2>
+        <Title size="lg" className="text-center mb-6 lg:mb-12">PRODUCTOS MÁS VENDIDOS</Title>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
           {bestSellerProducts.map((product) => (
             <ProductCard
